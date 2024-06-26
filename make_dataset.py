@@ -1,60 +1,57 @@
+import os
+import glob
 from PIL import Image
-import os, glob
 import numpy as np
-from keras.utils import np_utils
-from sklearn import model_selection
+import torch
+from torchvision import transforms
 from sklearn.model_selection import train_test_split
 
-classes = ["normal","unmarked_police"] #一般クラウンと覆面クラウンの2クラス
+# クラスと設定
+classes = ["normal", "unmarked_police"]
 num_classes = len(classes)
 image_size = 128
 
+# データセットのディレクトリ
+datadir = "./images"
 
-#datesetのディレクトリ
-datadir = "./"
+# 画像の前処理
+transform = transforms.Compose([
+    transforms.Resize((image_size, image_size)),
+    transforms.ToTensor(),
+    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+])
 
-#画像の読み込み
-X = []
-Y = []
+# データとラベルを格納するリスト
+data = []
+labels = []
 
-
+# データセットの作成
 for index, classlabel in enumerate(classes):
     image_dir = os.path.join(datadir, classlabel)
-    files = glob.glob(image_dir+ "/*.jpg")
-    for i, file in enumerate(files):
+    files = glob.glob(os.path.join(image_dir, "*"))
+    for file in files:
         image = Image.open(file)
         image = image.convert("RGB")
         image = image.resize((image_size, image_size))
-        data = np.asarray(image)
 
-        for angle in range(-20, 20, 5):##5
-            # 回転
+        # オリジナル画像
+        data.append(transform(image))
+        labels.append(index)
+
+        # 回転
+        for angle in range(-20, 20, 5):
             img_r = image.rotate(angle)
-            data = np.asarray(img_r)
-            X.append(data)
-            Y.append(index)
+            data.append(transform(img_r))
+            labels.append(index)
 
-            # 反転
-            img_trans = image.transpose(Image.FLIP_LEFT_RIGHT)
-            data = np.asarray(img_trans)
-            X.append(data)
-            Y.append(index)
+        # 反転
+        img_trans = image.transpose(Image.FLIP_LEFT_RIGHT)
+        data.append(transform(img_trans))
+        labels.append(index)
 
+# テンソルに変換
+data = torch.stack(data)
+labels = torch.tensor(labels)
 
-
-X = np.array(X)
-Y = np.array(Y)
-
-#２割テストデータへ
-(X_train, X_test, y_train, y_test) = train_test_split(X, Y,test_size=0.2)
-
-#正規化
-#X_train = X_train.astype("float") / 255
-#X_test = X_test.astype("float") / 255
-
-#教師データの型を変換
-y_train = np_utils.to_categorical(y_train,num_classes)
-y_test = np_utils.to_categorical(y_test, num_classes)
-
-xy = (X_train, X_test, y_train, y_test)
-np.save("./dataset.npy", xy)
+# データセットを保存
+torch.save((data, labels), 'crown.pt')
