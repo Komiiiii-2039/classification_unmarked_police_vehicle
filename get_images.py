@@ -63,8 +63,8 @@ def scrape_images_from_url(url, save_directory, base_url, depth=0, max_depth=2):
         print(f"Failed to scrape {url}: {e}")
 
 if __name__ == "__main__":
-    start_url = "https://policecar.nomaki.jp/fukumen/markx/"
-    save_directory = "./images/markx"  # ここに保存先ディレクトリを指定
+    start_url = "https://policecar.nomaki.jp/fukumen/crown/"
+    save_directory = "./images/unmarked_crown"  # ここに保存先ディレクトリを指定
 
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
