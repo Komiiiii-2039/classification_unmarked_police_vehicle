@@ -7,7 +7,7 @@ from torchvision import transforms
 from sklearn.model_selection import train_test_split
 
 # クラスと設定
-classes = ["normal", "unmarked_police"]
+classes = ["normal", "unmarked_crown"]
 num_classes = len(classes)
 image_size = 128
 
@@ -29,6 +29,9 @@ labels = []
 for index, classlabel in enumerate(classes):
     image_dir = os.path.join(datadir, classlabel)
     files = glob.glob(os.path.join(image_dir, "*"))
+    if len(files) == 0 :
+        print(f"No files in {image_dir}")
+        continue
     for file in files:
         image = Image.open(file)
         image = image.convert("RGB")
@@ -48,6 +51,7 @@ for index, classlabel in enumerate(classes):
         img_trans = image.transpose(Image.FLIP_LEFT_RIGHT)
         data.append(transform(img_trans))
         labels.append(index)
+    print(f"Create dataset for {classlabel}")
 
 # テンソルに変換
 data = torch.stack(data)
