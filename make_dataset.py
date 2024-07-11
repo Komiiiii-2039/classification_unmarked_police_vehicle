@@ -39,10 +39,10 @@ for index, classlabel in enumerate(classes):
         labels.append(index)
 
         # 回転
-        for angle in range(-20, 21, 5):
-            img_r = image.rotate(angle)
-            data.append(base_transform(img_r))
-            labels.append(index)
+        #for angle in range(-20, 21, 5):
+        #    img_r = image.rotate(angle)
+        #    data.append(base_transform(img_r))
+        #    labels.append(index)
 
         # 反転
         img_trans = image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -60,5 +60,5 @@ for label in range(num_classes):
     print(f"{classes[label]}: {torch.sum(labels == label)}")
 
 # データセットを保存
-torch.save((data, labels), 'crown.pt')
+torch.save((data, labels), '2labels_crown.pt')
 print("Dataset augmented and saved successfully.")
